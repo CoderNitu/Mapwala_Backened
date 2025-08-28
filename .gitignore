@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pkl
+*.pyc
+
+# Virtual environment
+venv/
+ENV/
+env/
+.venv/
+
+# Django stuff
+*.log
+*.pot
+*.pyc
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+static/
+
+# VSCode / IDE
+.vscode/
+.idea/
+
+# Environment files
+*.env
+.env.local
+.env.*.local
+
+# Mac / Windows system files
+.DS_Store
+Thumbs.db
+
+# Coverage / testing
+htmlcov/
+.tox/
+.coverage
+.pytest_cache/
+
+# Migrations (optional: keep if you want to version-control them)
+# **/migrations/
