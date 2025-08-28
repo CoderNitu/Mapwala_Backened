@@ -1,6 +1,6 @@
-# accounts/models.py
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class Capability(models.Model):
@@ -23,7 +23,40 @@ class Role(models.Model):
         return self.capabilities.filter(code=code).exists()
 
 
+# ✅ Custom manager for User
+class UserManager(BaseUserManager):
+    def create_user(self, phone_number, password=None, **extra_fields):
+        if not phone_number:
+            raise ValueError("The Phone Number must be set")
+        user = self.model(phone_number=phone_number, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, phone_number, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError("Superuser must have is_staff=True.")
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("Superuser must have is_superuser=True.")
+
+        return self.create_user(phone_number, password, **extra_fields)
+    
+
+class State(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class User(AbstractUser):
+    # keep username as a field, but make phone_number the login field
+    phone_number = models.CharField(
+        max_length=15, unique=True, verbose_name=_("Phone Number")
+    )
     role = models.ForeignKey(
         Role, null=True, blank=True, on_delete=models.SET_NULL, related_name="users"
     )
@@ -31,8 +64,19 @@ class User(AbstractUser):
         "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="team_members"
     )
 
+    address = models.CharField(max_length=255, blank=True, null=True)
+    gst_no = models.CharField(max_length=20, blank=True, null=True, unique=True)
+    tan_no = models.CharField(max_length=20, blank=True, null=True, unique=True)
+    state = models.ForeignKey(State, null=True, blank=True, on_delete=models.SET_NULL, related_name="users")
+    gst_upload = models.FileField(upload_to="uploads/gst/", null=True, blank=True)
+    tan_upload = models.FileField(upload_to="uploads/tan/", null=True, blank=True)
+
+    USERNAME_FIELD = "phone_number"
+    REQUIRED_FIELDS = ["username"]  # keep username but not required for login
+
+    objects = UserManager()
+
     def save(self, *args, **kwargs):
-        # Auto-assign "Admin" role for superusers if not set
         if self.is_superuser and not self.role:
             try:
                 admin_role = Role.objects.get(key__iexact="admin")
@@ -59,15 +103,12 @@ class User(AbstractUser):
 
         return False
 
-    # 🔹 Fix: Add capability check for views/permissions
     def has_capability(self, code: str) -> bool:
         if self.is_superuser:
             return True
         return self.role.has_capability(code) if self.role else False
 
-    # 🔹 Fix: Add manager check for views
     def is_manager_of(self, user) -> bool:
-        """Check if this user is an ancestor manager of another user."""
         current = user.reports_to
         while current:
             if current == self:
