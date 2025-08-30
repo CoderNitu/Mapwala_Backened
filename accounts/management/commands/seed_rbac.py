@@ -53,6 +53,8 @@ ROLE_MAP = {
         "caps": ["sales.approve", "purchase.approve", "user.view"],
     },
     "sales": {"name": "Sales", "caps": ["sales.create", "sales.approve", "user.view"]},
+    "distributor": {"name": "Distributor", "caps": ["user.view"]},
+    "vendor": {"name": "Vendor", "caps": ["user.view"]},
 }
 
 DEFAULT_STATES = [
@@ -103,3 +105,18 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS(f"Created states: {', '.join(created_states)}")
         )
+
+
+DEFAULT_DISTRICTS = [
+    ("Assam", [("Guwahati", "GUW"), ("Dibrugarh", "DBR")]),
+    ("Maharashtra", [("Mumbai", "MUM"), ("Pune", "PUN")]),
+]
+
+for state_name, districts in DEFAULT_DISTRICTS:
+    try:
+        state = State.objects.get(name=state_name)
+    except State.DoesNotExist:
+        continue
+    for dname, dcode in districts:
+        from locations.models import District
+        District.objects.get_or_create(name=dname, code=dcode, state=state)

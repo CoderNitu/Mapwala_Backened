@@ -28,7 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
-    "192.168.29.239",  # your LAN IP
+    "192.168.29.239",  
 ]
 
 
@@ -42,9 +42,10 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "rest_framework_simplejwt.token_blacklist",  # optional if you use JWT
+    "rest_framework_simplejwt.token_blacklist",  
     "accounts",
     "corsheaders",
+    "locations"
 ]
 
 MIDDLEWARE = [
@@ -71,8 +72,9 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_RENDERER_CLASSES": (
-        "accounts.renderers.CustomJSONRenderer",  # <- path to your renderer
+        "global.renderers.CustomRenderer",  
     ),
+     "EXCEPTION_HANDLER": "global.exceptions.custom_exception_handler",
 }
 
 from datetime import timedelta

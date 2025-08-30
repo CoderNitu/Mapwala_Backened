@@ -45,11 +45,17 @@ class UserManager(BaseUserManager):
         return self.create_user(phone_number, password, **extra_fields)
     
 
+
 class State(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    status = models.BooleanField(default=True)  # active / inactive shown in UI
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     def __str__(self):
         return self.name
+    
+
 
 
 class User(AbstractUser):
@@ -64,6 +70,7 @@ class User(AbstractUser):
         "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="team_members"
     )
 
+    # existing fields
     address = models.CharField(max_length=255, blank=True, null=True)
     gst_no = models.CharField(max_length=20, blank=True, null=True, unique=True)
     tan_no = models.CharField(max_length=20, blank=True, null=True, unique=True)
@@ -71,8 +78,38 @@ class User(AbstractUser):
     gst_upload = models.FileField(upload_to="uploads/gst/", null=True, blank=True)
     tan_upload = models.FileField(upload_to="uploads/tan/", null=True, blank=True)
 
+    # ---- NEW FIELDS to support Manufacturer/Vendor/Distributor forms ----
+    # These are snake_case in DB but serializers expose camelCase names expected by frontend
+    account_holder_name = models.CharField(max_length=255, null=True, blank=True)
+    account_number = models.CharField(max_length=64, null=True, blank=True)
+    bank_name = models.CharField(max_length=255, null=True, blank=True)
+    ifsc = models.CharField(max_length=64, null=True, blank=True)
+    district = models.CharField(max_length=150, null=True, blank=True)
+
+    district_fk = models.ForeignKey(
+        "locations.District",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="users"
+    )
+
+    pan = models.CharField(max_length=20, null=True, blank=True, unique=True)
+    pan_upload = models.FileField(upload_to="uploads/pan/", null=True, blank=True)
+    region = models.CharField(max_length=150, null=True, blank=True)
+    # link flags
+    linked_to_distributor = models.BooleanField(default=False)
+    linked_to_manufacturer = models.BooleanField(default=False)
+    # NOTE: gst_upload and tan_upload already exist
+    manufacturers = models.ManyToManyField(
+        "self",
+        blank=True,
+        symmetrical=False,
+        related_name="partners_with",  # manufacturers -> users associated
+    )
+
     USERNAME_FIELD = "phone_number"
-    REQUIRED_FIELDS = ["username"]  # keep username but not required for login
+    REQUIRED_FIELDS = ["username"]
 
     objects = UserManager()
 
