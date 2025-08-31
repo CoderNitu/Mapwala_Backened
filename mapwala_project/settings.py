@@ -31,6 +31,9 @@ ALLOWED_HOSTS = [
     "192.168.29.239",  
 ]
 
+# ALLOWED_HOSTS = ["*", "127.0.0.1", "localhost"]
+
+
 
 # Application definition
 
@@ -45,7 +48,8 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",  
     "accounts",
     "corsheaders",
-    "locations"
+    "locations",
+    "devices"
 ]
 
 MIDDLEWARE = [

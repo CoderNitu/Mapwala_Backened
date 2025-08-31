@@ -120,3 +120,5 @@ for state_name, districts in DEFAULT_DISTRICTS:
     for dname, dcode in districts:
         from locations.models import District
         District.objects.get_or_create(name=dname, code=dcode, state=state)
+
+
