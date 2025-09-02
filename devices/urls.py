@@ -1,9 +1,10 @@
 # devices/urls.py
 from rest_framework.routers import DefaultRouter
-from .views import DeviceViewSet,UnitOfMeasurementViewSet
+from .views import DeviceViewSet
 
 router = DefaultRouter()
-router.register(r'', DeviceViewSet, basename="devices")
-router.register(r'', UnitOfMeasurementViewSet, basename='unit-of-measurement')
+
+router.register(r'', DeviceViewSet, basename="device")
+
 
 urlpatterns = router.urls

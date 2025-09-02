@@ -28,7 +28,8 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
-    "192.168.29.239",  
+    "192.168.29.239",
+    "192.168.29.251"
 ]
 
 # ALLOWED_HOSTS = ["*", "127.0.0.1", "localhost"]
@@ -65,7 +66,8 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "https://mapwala.in",  # Production frontend
-    "http://localhost:3000",  # If you test with React locally
+    "http://localhost:3000",
+    "http://192.168.29.251:3000"  # If you test with React locally
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -162,3 +164,8 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+import os
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
